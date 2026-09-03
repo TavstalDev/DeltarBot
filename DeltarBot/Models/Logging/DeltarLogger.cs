@@ -1,4 +1,4 @@
-using Tavstal.DeltarBot.Utils;
+using Tavstal.DeltarBot.Utils.Logging;
 
 namespace Tavstal.DeltarBot.Models.Logging;
 
