@@ -46,7 +46,6 @@
     
     <ItemGroup>
       <Folder Include="Commands\" />
-      <Folder Include="Services\" />
     </ItemGroup>
     
     <ItemGroup>
@@ -55,7 +54,7 @@
     
     <ItemGroup>
       <Reference Include="WynnNetSDK">
-        <HintPath>..\libs\WynnNetSDK.dll</HintPath>
+        <HintPath>..\assets\libs\WynnNetSDK.dll</HintPath>
       </Reference>
     </ItemGroup>
 
