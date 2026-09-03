@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using Tavstal.DeltarBot.Models.Logging;
 
-namespace Tavstal.DeltarBot.Utils;
+namespace Tavstal.DeltarBot.Utils.Logging;
 
 public static class LoggerHelper
 {
