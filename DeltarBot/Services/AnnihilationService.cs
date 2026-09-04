@@ -45,6 +45,7 @@ public class AnnihilationService : IDisposable
 
     private async Task UpdateAsync()
     {
+        // TODO: Add check for was the message sent for the next event or not to prevent spamming
         try
         {
             var result = await _wynnClient.Map.ListEventsAsync();
