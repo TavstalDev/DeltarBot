@@ -1,4 +1,4 @@
-# DeltarBot
+# DeltarBot [WIP]
 
 ![Release (latest by date)](https://img.shields.io/github/v/release/TavstalDev/DeltarBot?style=plastic-square)
 ![Workflow Status](https://img.shields.io/github/actions/workflow/status/TavstalDev/DeltarBot/release.yml?branch=stable&label=build&style=plastic-square)
@@ -8,7 +8,7 @@
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE) file for more details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
 ## Contact
 
