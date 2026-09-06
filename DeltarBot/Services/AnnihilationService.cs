@@ -89,6 +89,7 @@ public class AnnihilationService : IDisposable
             builder.WithImageUrl("https://wynncraft.wiki.gg/images/Annihilation.png");
             var embed = builder.Build();
 
+            int sent = 0;
             foreach (var guild in _discordClient.Guilds)
             {
                 var config = _guildService.Get(guild.Id);
@@ -106,8 +107,9 @@ public class AnnihilationService : IDisposable
                 }
 
                 await textChannel.SendMessageAsync(embed: embed);
+                sent++;
             }
-            _logger.INFO($"Successfully sent annihilation world event alert to {_discordClient.Guilds.Count} guilds.");
+            _logger.INFO($"Successfully sent annihilation world event alert to {sent} guilds.");
         }
         catch (RateLimitException)
         {
