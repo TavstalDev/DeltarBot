@@ -11,6 +11,7 @@ using Tavstal.DeltarBot.Models.Logging;
 using Tavstal.DeltarBot.Services;
 using Tavstal.DeltarBot.Utils.Logging;
 using Tavstal.WynnNetSDK.Http;
+// ReSharper disable UnusedAutoPropertyAccessor.Local
 
 namespace Tavstal.DeltarBot;
 
@@ -18,6 +19,7 @@ public class Program
 {
     private static DiscordSocketClient _client = null!;
     private static WynnHttpClient _wynnClient = null!;
+    private static DataService _dataService { get; set; } = null!;
     private static WynnApiService _wynnApiService { get; set; } = null!;
     private static CacheService _cacheService { get; set; } = null!;
     private static GuildService _guildService { get; set; } = null!;
@@ -107,6 +109,9 @@ public class Program
         // Run the log queue on a background task
         _ = Task.Run(() => LoggerHelper.ProcessLogQueueAsync(_logCts.Token));
 
+        _dataService = new DataService(Path.Combine(currentWorkingDirectory, "data.json"));
+        await _dataService.LoadAsync();
+        
         string? token = Environment.GetEnvironmentVariable("DISCORD_TOKEN");
         if (string.IsNullOrEmpty(token))
         {
@@ -167,7 +172,7 @@ public class Program
         
         _wynnApiService = new WynnApiService(_wynnClient);
         _guildService = new GuildService(_client);
-        _annihilationService = new AnnihilationService(_wynnClient, _client, _guildService);
+        _annihilationService = new AnnihilationService(_wynnClient, _client, _dataService, _guildService);
         
         _logger.DEBUG("Listing Camps...");
         foreach (var camp in result.Value)
