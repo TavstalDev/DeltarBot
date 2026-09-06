@@ -11,14 +11,16 @@ public class AnnihilationService : IDisposable
 {
     private readonly WynnHttpClient _wynnClient;
     private readonly DiscordSocketClient _discordClient;
+    private readonly DataService _dataService;
     private readonly GuildService _guildService;
     private readonly CancellationTokenSource _cts = new();
     private static readonly DeltarLogger _logger = new(nameof(AnnihilationService));
 
-    public AnnihilationService(WynnHttpClient wynnClient, DiscordSocketClient discordClient, GuildService guildService)
+    public AnnihilationService(WynnHttpClient wynnClient, DiscordSocketClient discordClient, DataService dataService, GuildService guildService)
     {
         _wynnClient = wynnClient;
         _discordClient = discordClient;
+        _dataService = dataService;
         _guildService = guildService;
         Task.Run(async () =>
         {
@@ -45,9 +47,13 @@ public class AnnihilationService : IDisposable
 
     private async Task UpdateAsync()
     {
-        // TODO: Add check for was the message sent for the next event or not to prevent spamming
         try
         {
+            var lastDate = _dataService.Data.Annihilation.Last;
+            var currentDate = DateTime.UtcNow;
+            if (lastDate.DayOfYear == currentDate.DayOfYear)
+                return;
+            
             var result = await _wynnClient.Map.ListEventsAsync();
             if (result.IsError)
             {
@@ -68,7 +74,7 @@ public class AnnihilationService : IDisposable
                 _logger.ERROR($"Failed to find Prelude to Annihilation world event.");
                 return;
             }
-
+            
             if (annihilationEvent.Schedule == null)
             {
                 _logger.DEBUG("Annihilation event was not scheduled yet.");
@@ -110,6 +116,8 @@ public class AnnihilationService : IDisposable
                 sent++;
             }
             _logger.INFO($"Successfully sent annihilation world event alert to {sent} guilds.");
+            _dataService.Data.Annihilation.Last = DateTime.UtcNow;
+            await _dataService.SaveAsync();
         }
         catch (RateLimitException)
         {
