@@ -20,7 +20,6 @@ public class Program
     private static DiscordSocketClient _client = null!;
     private static WynnHttpClient _wynnClient = null!;
     private static DataService _dataService { get; set; } = null!;
-    private static WynnApiService _wynnApiService { get; set; } = null!;
     private static CacheService _cacheService { get; set; } = null!;
     private static GuildService _guildService { get; set; } = null!;
     private static AnnihilationService _annihilationService { get; set; } = null!;
@@ -132,7 +131,6 @@ public class Program
         try
         {
             _cacheService?.Dispose();
-            _wynnApiService?.Dispose();
             _client?.Dispose();
         }
         finally
@@ -170,7 +168,6 @@ public class Program
             return;
         }
         
-        _wynnApiService = new WynnApiService(_wynnClient);
         _guildService = new GuildService(_client);
         _annihilationService = new AnnihilationService(_wynnClient, _client, _dataService, _guildService);
         
