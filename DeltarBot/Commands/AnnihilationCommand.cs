@@ -30,7 +30,7 @@ public class AnnihilationCommand : ICommand
        await _client.CreateGlobalApplicationCommandAsync(cmd.Build());
    }
 
-   public async Task HandleAsync( SocketSlashCommand data)
+   public async Task HandleAsync(SocketSlashCommand data)
    {
        if (data.GuildId == null || data.ChannelId == null)
        {
