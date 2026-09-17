@@ -2,5 +2,6 @@ namespace Tavstal.DeltarBot.Models.Guilds;
 
 public class GuildConfig
 {
-    public ulong? AnnihilationChannelId { get; set; }
+    public ulong? BotChannelId { get; set; }
+    public Dictionary<EGuildChannel, ulong> FeedChannels { get; set; } = [];
 }
