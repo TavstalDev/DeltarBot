@@ -224,10 +224,15 @@ public class Program
        var guildId = command.GuildId;
        if (guildId != null)
        {
+           var guild = _client.GetGuild(guildId.Value);
            var guildConfig = _guildService.Get(guildId.Value);
-           if (guildConfig.BotChannelId != null && guildConfig.BotChannelId != command.ChannelId)
+           SocketChannel? commandChannel = null;
+           if (guildConfig.BotChannelId != null)
+               commandChannel = guild.GetChannel(guildConfig.BotChannelId.Value);
+           
+           if (commandChannel != null && guildConfig.BotChannelId != command.ChannelId)
            {
-               await command.RespondAsync($"You can only use the bot in the #{command.ChannelId} channel.");
+               await command.RespondAsync($"You can only use the bot in the <#{command.ChannelId}> channel.");
                return;
            }
        }
