@@ -33,6 +33,7 @@ public class Program
         Formatting = Formatting.Indented,
         Converters = { new StringEnumConverter() }
     };
+    public static SocketGuild? DevelopmentGuild { get; private set; }
     
     public static async Task Main()
     {
@@ -121,6 +122,8 @@ public class Program
         
         await _client.LoginAsync(TokenType.Bot, token);
         await _client.StartAsync();
+        await _client.SetStatusAsync(UserStatus.Online);
+        await _client.SetGameAsync("Wynncraft");
         
         await Task.Delay(-1);
     }
@@ -143,11 +146,6 @@ public class Program
     private static async Task Ready()
     {
         _logger.INFO($"Logged in as {_client.CurrentUser.Username}#{_client.CurrentUser.Discriminator} ({_client.CurrentUser.Id})");
-        await _client.SetStatusAsync(UserStatus.Online);
-        await _client.SetCustomStatusAsync("Searching for LEs...");
-        await _client.SetGameAsync("Wynncraft");
-        
-        _logger.INFO("Initializing Wynncraft API client...");
         string? token = Environment.GetEnvironmentVariable("WYNN_TOKEN");
         if (string.IsNullOrEmpty(token))
         {
@@ -156,7 +154,9 @@ public class Program
             return;
         }
 
+        _logger.INFO("Initializing cache service...");
         _cacheService = new CacheService();
+        _logger.INFO("Initializing Wynncraft API client...");
         _wynnClient = new WynnHttpClient(new WynnEnvironment(token), cacheManager: _cacheService);
         
         // TEST REQUEST
@@ -181,6 +181,8 @@ public class Program
         _logger.INFO("Registering commands...");
         var commandTypes = Assembly.GetExecutingAssembly().GetTypes()
             .Where(t => t is { IsClass: true, IsAbstract: false } && typeof(ICommand).IsAssignableFrom(t));
+
+        List<ApplicationCommandProperties> commands = [];
         foreach (var command in commandTypes)
         {
             var commandInstance = Activator.CreateInstance(command, _client, _wynnClient, _guildService);
@@ -189,9 +191,28 @@ public class Program
                 _logger.WARN($"Failed to create instance of command {command.FullName}");
                 continue;
             }
-            await instance.RegisterAsync();
+            
+            commands.Add(instance.Build());
             _commands[instance.Name] = instance;
-            _logger.DEBUG($"Registered {instance.Name} command.");
+            _logger.DEBUG($"Built {instance.Name} command.");
+        }
+
+        ApplicationCommandProperties[] commandArray = commands.ToArray();
+        await _client.BulkOverwriteGlobalApplicationCommandsAsync(commandArray);
+        if (DevelopmentGuild != null)
+            await DevelopmentGuild.BulkOverwriteApplicationCommandAsync(commandArray);
+        _logger.INFO($"Finished registering {commandArray.Length} commands.");
+        
+        // ReSharper disable RedundantAssignment - Clear the collections to help garbage collection
+        commands = [];
+        commandArray = [];
+        // ReSharper restore RedundantAssignment
+        
+        if (Config.DevelopmentGuildId != null)
+        {
+            _logger.INFO("Checking development guild...");
+            DevelopmentGuild = _client.GetGuild(Config.DevelopmentGuildId.Value);
+            _logger.INFO(DevelopmentGuild != null ? "Development guild has been found." : "Development guild was not found.");
         }
     }
     
@@ -199,6 +220,18 @@ public class Program
     {
        if (!_commands.TryGetValue(command.Data.Name, out var cmd))
            return;
+
+       var guildId = command.GuildId;
+       if (guildId != null)
+       {
+           var guildConfig = _guildService.Get(guildId.Value);
+           if (guildConfig.BotChannelId != null && guildConfig.BotChannelId != command.ChannelId)
+           {
+               await command.RespondAsync($"You can only use the bot in the #{command.ChannelId} channel.");
+               return;
+           }
+       }
+           
        await cmd.HandleAsync(command);
     }
 
