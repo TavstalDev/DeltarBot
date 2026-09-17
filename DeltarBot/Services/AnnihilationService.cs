@@ -1,6 +1,7 @@
 using Discord;
 using Discord.WebSocket;
 using Tavstal.DeltarBot.Extensions;
+using Tavstal.DeltarBot.Models.Guilds;
 using Tavstal.DeltarBot.Models.Logging;
 using Tavstal.WynnNetSDK.Exceptions;
 using Tavstal.WynnNetSDK.Http;
@@ -99,13 +100,13 @@ public class AnnihilationService : IDisposable
             foreach (var guild in _discordClient.Guilds)
             {
                 var config = _guildService.Get(guild.Id);
-                if (config.AnnihilationChannelId == null)
+                if (!config.FeedChannels.TryGetValue(EGuildChannel.WORLD_EVENT_MAJOR, out ulong channelId))
                 {
                     _logger.DEBUG($"Guild {guild.Name} ({guild.Id}) has no annihilation channel set.");
                     continue;
                 }
                 
-                var anniChannel = await _discordClient.GetChannelAsync(config.AnnihilationChannelId.Value);
+                var anniChannel = await _discordClient.GetChannelAsync(channelId);
                 if (anniChannel is not ITextChannel textChannel)
                 {
                     _logger.DEBUG($"Guild {guild.Name} ({guild.Id}) has an invalid annihilation channel set.");
