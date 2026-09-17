@@ -6,31 +6,19 @@ using Tavstal.WynnNetSDK.Http;
 
 namespace Tavstal.DeltarBot.Commands.Guild;
 
-public class GuildFindCommand : ICommand
+public class GuildFindCommand : SimpleCommand
 {
-    private readonly DiscordSocketClient _client;
-    private readonly WynnHttpClient _wynnClient;
-    private readonly GuildService _guildService;
-    
-    public string Name => "gfind";
-    public string Description => "";
+    public GuildFindCommand(DiscordSocketClient client, WynnHttpClient wynnClient, GuildService guildService) : base(
+        "gfind",
+        "TODO",
+        client, wynnClient, guildService) { }
 
-    public GuildFindCommand(DiscordSocketClient client, WynnHttpClient wynnClient, GuildService guildService)
+    public override SlashCommandBuilder HandleBuild(SlashCommandBuilder cmd)
     {
-        _client = client;
-        _wynnClient = wynnClient;
-        _guildService = guildService;
-    }
-    
-    public async Task RegisterAsync()
-    {
-        var cmd = new SlashCommandBuilder();
-        cmd.WithName(Name);
-        cmd.WithDescription(Description);
-        await _client.CreateGlobalApplicationCommandAsync(cmd.Build());
+        return cmd;
     }
 
-    public async Task HandleAsync(SocketSlashCommand data)
+    public override async Task HandleAsync(SocketSlashCommand data)
     {
         
     }

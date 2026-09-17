@@ -7,18 +7,16 @@ using Tavstal.WynnNetSDK.Http;
 
 namespace Tavstal.DeltarBot.Commands.Feed;
 
-public class FeedTrackCommand : SimpleCommand
+public class FeedRemoveCommand : SimpleCommand
 {
-    public FeedTrackCommand(DiscordSocketClient client, WynnHttpClient wynnClient, GuildService guildService) : base(
-        "ftrack",
-        "Sets a channel to track a specific type of messages.",
+    public FeedRemoveCommand(DiscordSocketClient client, WynnHttpClient wynnClient, GuildService guildService) : base(
+        "fremove",
+        "Removes a channel from the guild's feed config.",
         client, wynnClient, guildService) { }
-
+    
     public override SlashCommandBuilder HandleBuild(SlashCommandBuilder cmd)
     {
         cmd.WithDefaultMemberPermissions(GuildPermission.Administrator);
-        cmd.AddOption("channel", ApplicationCommandOptionType.Channel, "The target channel.", true,
-            isAutocomplete: true);
         
         var enumType = typeof(EGuildChannel);
         var enumNames = Enum.GetNames(enumType);
@@ -28,17 +26,18 @@ public class FeedTrackCommand : SimpleCommand
             .WithDescription("Type of the feed.")
             .WithRequired(true)
             .WithType(ApplicationCommandOptionType.String);
-
+        
         foreach (var t in enumNames)
             typeOption.AddChoice(t, t);
-
+        
         cmd.AddOption(typeOption);
+        
         return cmd;
     }
 
     public override async Task HandleAsync(SocketSlashCommand data)
     {
-        if (data.GuildId == null)
+        if (data.GuildId == null || data.ChannelId == null)
         {
             await data.RespondAsync("This command can only be used in a server's text channel.", ephemeral: true);
             return;
@@ -51,20 +50,14 @@ public class FeedTrackCommand : SimpleCommand
         }
 
         var guildConfig = _guildService.Get(data.GuildId.Value);
-
-        var channelOption = data.Data.Options.ElementAt(0);
-        var channel = (SocketChannel)channelOption.Value;
-        if (channel is not SocketTextChannel textChannel)
+        var option = data.Data.Options.ElementAt(0);
+        var value = Enum.Parse<EGuildChannel>((string)option.Value);
+        if (!guildConfig.FeedChannels.Remove(value, out _))
         {
-            await data.RespondAsync("You must provide a text channel.");
+            await data.RespondAsync("The provided feed type has not been set.", ephemeral: true);
             return;
         }
-        
-        var guildChannelOption = data.Data.Options.ElementAt(1);
-        var guildChannel = Enum.Parse<EGuildChannel>((string)guildChannelOption.Value);
-        guildConfig.FeedChannels[guildChannel] = textChannel.Id;
-        
         _guildService.Update(data.GuildId.Value, guildConfig);
-        await data.RespondAsync($"The <#{textChannel.Id}> channel has been set to get {guildChannel} notifications.", ephemeral: true);
+        await data.RespondAsync($"The provided feed type has been successfully removed.", ephemeral: true);
     }
 }
