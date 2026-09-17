@@ -1,3 +1,4 @@
+using Discord;
 using Discord.WebSocket;
 
 namespace Tavstal.DeltarBot.Models.Commands;
@@ -8,7 +9,7 @@ public interface ICommand
     
     string Description { get; }
     
-    Task RegisterAsync();
+    SlashCommandProperties Build();
 
     Task HandleAsync(SocketSlashCommand data);
 }
