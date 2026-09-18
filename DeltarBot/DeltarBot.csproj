@@ -33,9 +33,9 @@
       <PackageReference Include="Discord.Net.Commands" Version="3.20.1" />
       <PackageReference Include="Discord.Net.Interactions" Version="3.20.1" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-      <PackageReference Include="WynnNetSDK" Version="1.0.0" />
+      <!--<PackageReference Include="WynnNetSDK" Version="1.0.0" />-->
     </ItemGroup>
-
+    
     <ItemGroup>
         <None Update="appsettings.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -46,6 +46,8 @@
     </ItemGroup>
     
     <ItemGroup>
-      <None Remove="config.json" />
+      <Reference Include="WynnNetSDK">
+        <HintPath>..\assets\WynnNetSDK.dll</HintPath>
+      </Reference>
     </ItemGroup>
 </Project>
