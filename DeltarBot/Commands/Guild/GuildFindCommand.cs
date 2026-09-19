@@ -11,7 +11,7 @@ public class GuildFindCommand : SimpleCommand
 {
     public GuildFindCommand(DiscordSocketClient client, WynnHttpClient wynnClient, GuildService guildService) : base(
         "gfind",
-        "TODO",
+        "Shows basic information about the provided guild.",
         client, wynnClient, guildService) { }
 
     public override SlashCommandBuilder HandleBuild(SlashCommandBuilder cmd)
@@ -33,12 +33,6 @@ public class GuildFindCommand : SimpleCommand
 
     public override async Task HandleAsync(SocketSlashCommand data)
     {
-        if (data.GuildId == null)
-        {
-            await data.RespondAsync("This command can only be used in a server's text channel.", ephemeral: true);
-            return;
-        }
-
         if (data.Data.Options.Count == 0)
         {
             await data.RespondAsync("You must provide arguments.", ephemeral: true);
