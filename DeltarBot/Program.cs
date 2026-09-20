@@ -5,6 +5,7 @@ using Discord.WebSocket;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Tavstal.DeltarBot.Extensions;
+using Tavstal.DeltarBot.Models;
 using Tavstal.DeltarBot.Models.Commands;
 using Tavstal.DeltarBot.Models.Config;
 using Tavstal.DeltarBot.Models.Logging;
@@ -28,6 +29,7 @@ public class Program
     private static readonly Dictionary<string, ICommand> _commands = new();
     
     public static DeltarConfiguration Config { get; private set; } = null!;
+    public static WynnData WynnData { get; private set; } = null!;
     public static JsonSerializerSettings JsonSerializerSettings { get; } = new()
     {
         Formatting = Formatting.Indented,
@@ -105,6 +107,7 @@ public class Program
         _client.Log += Log;
         _client.Ready += Ready;
         _client.SlashCommandExecuted += SlashCommandHandler;
+        _client.AutocompleteExecuted += AutocompleteExecuted;
 
         // Run the log queue on a background task
         _ = Task.Run(() => LoggerHelper.ProcessLogQueueAsync(_logCts.Token));
@@ -160,7 +163,7 @@ public class Program
         _wynnClient = new WynnHttpClient(new WynnEnvironment(token), cacheManager: _cacheService);
         
         // TEST REQUEST
-        var result = await _wynnClient.Map.ListCampsAsync();
+        var result = await _wynnClient.Leaderboard.ListTypesAsync();
         if (result.IsError)
         {
             _logger.ERROR($"Wynn API returned an error: \nName: {result.Error.Name} - {result.Error.Code} \nMessage: {result.Error.Message}");
@@ -170,12 +173,11 @@ public class Program
         
         _guildService = new GuildService(_client);
         _annihilationService = new AnnihilationService(_wynnClient, _client, _dataService, _guildService);
-        
-        _logger.DEBUG("Listing Camps...");
-        foreach (var camp in result.Value)
+        WynnData = new WynnData
         {
-            _logger.DEBUG($"{camp.Name} -> {camp.Lore}");
-        }
+            LeaderboardTypes = result.Value ?? []
+        };
+
         _logger.INFO("Wynn API client initialized successfully.");
         
         _logger.INFO("Registering commands...");
@@ -238,6 +240,17 @@ public class Program
        }
            
        await cmd.HandleAsync(command);
+    }
+    
+    private static async Task AutocompleteExecuted(SocketAutocompleteInteraction command)
+    {
+        if (!_commands.TryGetValue(command.Data.CommandName, out var cmd))
+            return;
+        
+        if (cmd is not AutoCompleteCommand completeCommand)
+            return;
+
+        await completeCommand.AutocompleteHandler(command);
     }
 
     private static Task Log(LogMessage msg)
