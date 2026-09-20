@@ -55,9 +55,11 @@ public class LeaderboardCommand : AutoCompleteCommand
             var resultDic = result.Value;
             var embed = new EmbedBuilder()
                 .WithTitle($"{leaderboardName} Leaderboard")
+                .WithUrl("https://github.com/TavstalDev/DeltarBot")
                 .WithThumbnailUrl("https://raw.githubusercontent.com/TavstalDev/DeltarBot/refs/heads/master/assets/images/icon_guild.png")
                 .WithColor(Color.Blue)
-                .WithCurrentTimestamp();
+                .WithCurrentTimestamp()
+                .WithFooter("DeltarBot");
 
             var description = new StringBuilder();
             foreach (var entry in resultDic)

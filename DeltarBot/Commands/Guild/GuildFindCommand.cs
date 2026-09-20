@@ -70,6 +70,7 @@ public class GuildFindCommand : SimpleCommand
             var guild = result.Value;
             var embed = new EmbedBuilder()
                 .WithTitle($"[{guild.Prefix}] {guild.Name}")
+                .WithUrl("https://github.com/TavstalDev/DeltarBot")
                 .WithThumbnailUrl("https://raw.githubusercontent.com/TavstalDev/DeltarBot/refs/heads/master/assets/images/icon_guild.png")
                 .WithColor(Color.Blue)
                 .WithTimestamp(guild.Created)

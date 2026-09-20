@@ -70,9 +70,11 @@ public class GuildSeasonCommand : SimpleCommand
             var guild = result.Value;
             var embed = new EmbedBuilder()
                 .WithTitle($"[{guild.Prefix}] {guild.Name}")
+                .WithUrl("https://github.com/TavstalDev/DeltarBot")
                 .WithThumbnailUrl("https://raw.githubusercontent.com/TavstalDev/DeltarBot/refs/heads/master/assets/images/icon_guild.png")
                 .WithColor(Color.Blue)
-                .WithTimestamp(guild.Created);
+                .WithCurrentTimestamp()
+                .WithFooter("DeltarBot");
 
             string description = string.Empty;
             foreach (var season in guild.SeasonRanks.OrderBy(x => x.Key))
