@@ -57,13 +57,17 @@ public class GuildSeasonCommand : SimpleCommand
         
         try
         {
+            await data.DeferAsync(true);
             var result = isPrefix
                 ? await _wynnClient.Guild.GetByPrefixAsync(guildName)
                 : await _wynnClient.Guild.GetByNameAsync(guildName);
 
             if (result.IsError)
             {
-                await data.RespondAsync(result.Error?.Message ?? "Failed to get guilds.", ephemeral: true);
+                await data.ModifyOriginalResponseAsync(msg =>
+                {
+                    msg.Content = new Optional<string>(result.Error?.Message ?? "Failed to get guilds.");
+                });
                 return;
             }
             
@@ -84,11 +88,17 @@ public class GuildSeasonCommand : SimpleCommand
 
             embed.WithDescription(description);
             
-            await data.RespondAsync(embed: embed.Build());
+            await data.ModifyOriginalResponseAsync(msg =>
+            {
+                msg.Embed = new Optional<Embed>(embed.Build());
+            });
         }
         catch (RateLimitException ex)
         {
-            await data.RespondAsync(ex.Message, ephemeral: true);
+            await data.ModifyOriginalResponseAsync(msg =>
+            {
+                msg.Content = new Optional<string>(ex.Message);
+            });
         }
     }
 }

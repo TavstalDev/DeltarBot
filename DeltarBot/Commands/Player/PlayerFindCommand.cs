@@ -40,11 +40,15 @@ public class PlayerFindCommand : SimpleCommand
         
         try
         {
+            await data.DeferAsync(true);
             var result = await _wynnClient.Player.GetProfileAsync(playerName);
 
             if (result.IsError)
             {
-                await data.RespondAsync(result.Error?.Message ?? "Failed to get leaderboard data.", ephemeral: true);
+                await data.ModifyOriginalResponseAsync(msg =>
+                {
+                    msg.Content = new Optional<string>(result.Error?.Message ?? "Failed to get player data.");
+                });
                 return;
             }
             
@@ -107,11 +111,17 @@ public class PlayerFindCommand : SimpleCommand
             
             embed.WithDescription(description.ToString());
             
-            await data.RespondAsync(embed: embed.Build());
+            await data.ModifyOriginalResponseAsync(msg =>
+            {
+                msg.Embed = new Optional<Embed>(embed.Build());
+            });
         }
         catch (RateLimitException ex)
         {
-            await data.RespondAsync(ex.Message, ephemeral: true);
+            await data.ModifyOriginalResponseAsync(msg =>
+            {
+                msg.Content = new Optional<string>(ex.Message);
+            });
         }
     }
 }
