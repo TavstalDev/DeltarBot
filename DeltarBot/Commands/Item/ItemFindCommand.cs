@@ -1,13 +1,10 @@
 using System.Text;
-using System.Text.RegularExpressions;
 using Discord;
 using Discord.WebSocket;
 using Tavstal.DeltarBot.Models.Commands;
 using Tavstal.DeltarBot.Services;
 using Tavstal.WynnNetSDK.Exceptions;
 using Tavstal.WynnNetSDK.Http;
-using Tavstal.WynnNetSDK.Http.Requests.Items.Bodies;
-using Tavstal.WynnNetSDK.Models.Leaderboard;
 
 namespace Tavstal.DeltarBot.Commands.Item;
 
@@ -43,10 +40,7 @@ public class ItemFindCommand : SimpleCommand
         try
         {
             await data.DeferAsync(true);
-            var result = await _wynnClient.Items.SearchAsync(new ItemSearchRequestBody
-            {
-                Query = itemName
-            });
+            var result = await _wynnClient.Items.QuickSearchAsync(itemName);
 
             if (result.IsError)
             {
@@ -59,14 +53,14 @@ public class ItemFindCommand : SimpleCommand
             
             var itemResult = result.Value;
             var embed = new EmbedBuilder()
-                .WithTitle($"Found {itemResult.Results.Count} items.")
+                .WithTitle($"Found {itemResult.Count} items.")
                 .WithUrl("https://github.com/TavstalDev/DeltarBot")
                 .WithColor(Color.Blue)
                 .WithCurrentTimestamp()
                 .WithFooter("DeltarBot");
 
             var description = new StringBuilder();
-            foreach (var item in itemResult.Results)
+            foreach (var item in itemResult)
             {
                 description.AppendLine($"**{item.DisplayName}**");
                 description.AppendLine($"> **Type:** {item.Type}");
